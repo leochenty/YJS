@@ -42,6 +42,8 @@ namespace YJS_NAMESPACE {
 
 		virtual ItemPtr predecessor(ItemPtr itemPtr) const = 0;
 
+
+
 		virtual ItemPtr successor(ItemPtr itemPtr) const = 0;
 	};
 

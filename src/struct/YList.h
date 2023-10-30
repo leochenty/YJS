@@ -17,6 +17,9 @@ namespace YJS_NAMESPACE {
 
 			virtual ~ItemList() {};
 			// 添加你需要的的变量, 这是一个例子
+			ItemInterface* left;
+
+			ItemInterface* right;
 		}_ItemType_No_Use;
 
 		typedef unsigned int Size;

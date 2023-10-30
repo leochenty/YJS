@@ -31,7 +31,7 @@ namespace YJS_NAMESPACE {
 
 	void YList::deleteItem(Index index)
 	{
-		ItemTypePtr _deletePtr = _getItemByIndex(index);
+		ItemTypePtr _deletePtr = _getItemByIndex(index+1);
 
 		if (!_deletePtr)
 			return;
