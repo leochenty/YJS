@@ -7,47 +7,57 @@
 namespace YJS_NAMESPACE {
 	class YList : public YInterface {
 	public:
-		typedef class ItemList : public ItemInterface {
+		class ItemList : public ItemListInterface {
 		public:
-			ItemList() :ItemInterface() {};
+			ItemList(const ItemMessage& itemMessage)
+				:ItemListInterface(itemMessage),
+				size(1),
+				realSize(1),
+				isDelete(std::vector<char>(1,0)){};
 
-			ItemList(const ItemInterface& p)
-				:ItemInterface(p)
-			{};
+			//ItemList(const ItemListInterface& p)
+			//	:ItemListInterface(p)
+			//{};
 
 			virtual ~ItemList() {};
 			// 添加你需要的的变量, 这是一个例子
-			ItemInterface* left;
+			ItemList* left = nullptr;
 
-			ItemInterface* right;
-		}_ItemType_No_Use;
+			ItemList* right = nullptr;
+
+			std::vector<char> isDelete;
+
+			int size;
+			int realSize;
+		};
 
 		typedef unsigned int Size;
-		typedef ItemInterface ItemType;
-		typedef ItemInterface* ItemTypePtr;
+		typedef ItemList* ItemListPtr;
+
+		ItemListPtr head;
 
 		YList() {
-			head = new ItemType;
+			head = new ItemList(
+				ItemMessage{ '\0', Id(-1,-1) , Id(-1, -1), Id(-1, -1) });
 			head->left = head;
 			head->right = head;
 		};
-		~YList() {
+		virtual ~YList() {
 			delete head;
 		};
 
-		Size size = 0;
+		//Size size = 0;
 
-		ItemType* head;
 
-		virtual ItemPtr begin() const override {
-			return head->right;
+		virtual inline ItemPtr begin() const override {
+			return ItemPtr(head->right, 0);
 		};
 
-		virtual ItemPtr end() const override {
-			return head;
+		virtual inline ItemPtr end() const override {
+			return ItemPtr(head, 0);
 		};
 
-		virtual void insertItem(Index index, Item item) override;
+		virtual void insertItem(Index index, ItemMessage itemMsg) override;
 
 		// virtual void insertItem(ItemPtr item) override;
 
@@ -69,6 +79,6 @@ namespace YJS_NAMESPACE {
 
 
 	private:
-		ItemTypePtr _getItemByIndex(int index) const;
+		ItemPtr _getItemByIndex(int index) const;
 	};
 }
