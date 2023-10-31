@@ -28,7 +28,7 @@ namespace YJS_NAMESPACE {
 		
 		YInterface* yStruct;
 
-		void localInsert(Index index, char context);
+		void localInsert(Index index, Text context);
 
 		void localDelete(Index index);
 

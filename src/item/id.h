@@ -5,11 +5,9 @@
 namespace YJS_NAMESPACE{
 	typedef unsigned int Clock;
 	typedef unsigned int ClientId;
-
 	class Id
 		{
 		public:
-
 			// Id() {};
 			~Id() {};
 
