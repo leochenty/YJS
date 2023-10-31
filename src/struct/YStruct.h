@@ -1,16 +1,32 @@
 #pragma once
 
-#include "src/item/Item.h"
+#include "src/item/itemNew.h"
 
 namespace YJS_NAMESPACE {
 	typedef int Index;
 	// typedef const ItemInterface& Item_const;
 	// typedef ItemInterface ItemPtr;
 
-	typedef ItemInterface Item;
-	typedef ItemInterface* ItemPtr;
+	// typedef ItemInterface Item;
+	// typedef ItemInterface* ItemPtr;
 	//typedef void* Item;
 	typedef const Id Id_const;
+
+
+	/*
+		这是一种变形指针，用于快速交换内存中的数据
+	*/
+	typedef std::pair<ItemListInterface*, Offset> ItemPtr;
+
+	/*
+		这是一种变形指针，用于快速交换内存中的数据
+	*/
+	//struct ItemPtr {
+	//	ItemListInterface* itemHead;
+	//	Offset offset;
+	//};
+
+	
 
 	class YInterface {
 		
@@ -19,11 +35,11 @@ namespace YJS_NAMESPACE {
 		YInterface() {};
 		virtual ~YInterface() {};
 
-		virtual ItemPtr begin() const = 0;
+		virtual inline ItemPtr begin() const = 0;
 
-		virtual ItemPtr end() const = 0;
+		virtual inline ItemPtr end() const = 0;
 
-		virtual void insertItem(Index index, ItemInterface item) = 0;
+		virtual void insertItem(Index index, ItemMessage itemMsg) = 0;
 
 		//virtual void insertItem(ItemPtr item) = 0;
 
