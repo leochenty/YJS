@@ -62,16 +62,13 @@ namespace YJS_NAMESPACE {
 
 		YList() {
 			_head = new ItemList(
-				ItemMessage{ 'H', Id(1301,0) , Id(0, 0), Id(1209, 0) });
+				ItemMessage{ '[', Id(8888,0) , Id(0, 0), Id(9999, 0) });
 			_end = new ItemList(
-				ItemMessage{ 'E', Id(1209,0) , Id(1301, 0), Id(0, 0) });
-			//_head->size = 0;
-			//_head->right = _end;
-			//_end->size = 0;
-			//_end->left = _head;
-			_head->left = _head;
-			_head->right = _head;
+				ItemMessage{ ']', Id(9999,0) , Id(8888, 0), Id(0, 0) });
 			_head->size = 0;
+			_head->right = _end;
+			_end->size = 0;
+			_end->left = _head;
 
 		};
 		virtual ~YList() {
@@ -83,11 +80,11 @@ namespace YJS_NAMESPACE {
 
 
 		virtual inline ItemPtr begin() const override {
-			return ItemPtr(_head->right, 0);
+			return successor(ItemPtr(_head, 0));
 		};
 
 		virtual inline ItemPtr end() const override {
-			return ItemPtr(_head, 0);
+			return ItemPtr(_end, 0);
 		};
 
 		virtual void insertItem(Index index, ItemMessage itemMsg) override;
@@ -111,6 +108,8 @@ namespace YJS_NAMESPACE {
 		virtual ItemPtr successor(ItemPtr item) const override;
 
 		virtual Id getId(ItemPtr itemPtr) const override;
+
+
 
 	private:
 		ItemPtr _getItemByIndex(Index index) const;

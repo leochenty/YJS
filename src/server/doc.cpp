@@ -21,7 +21,7 @@ namespace YJS_NAMESPACE{
 
 	void Doc::localInsert(Index index, char context)
 	{
-		ItemPtr _insertPtr = yStruct->getItemByPos(index);
+		ItemPtr _insertPtr = yStruct->getItemByPos(index - 1);
 		ItemPtr _insertNextPtr = yStruct->successor(_insertPtr);
 
 		ItemMessage _insertItemMsg(
@@ -31,7 +31,7 @@ namespace YJS_NAMESPACE{
 			yStruct->getId(_insertNextPtr)
 			);
 
-		yStruct->insertItem(index, _insertItemMsg);
+		yStruct->insertItem(index - 1, _insertItemMsg);
 	}
 
 	void Doc::localDelete(Index index)
@@ -46,10 +46,7 @@ namespace YJS_NAMESPACE{
 		ItemPtr _headTemp = this->yStruct->begin();
 		std::string ans;
 		while (_headTemp!=this->yStruct->end()) {
-			ans += _headTemp.first->context;
-
-			YJS_DEBUG("%d %s", _headTemp.first->headId.clock, _headTemp.first->context.c_str());
-
+			ans += _headTemp.first->context[_headTemp.second];
 			_headTemp = yStruct->successor(_headTemp);
 		}
 		return ans;

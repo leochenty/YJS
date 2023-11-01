@@ -6,7 +6,7 @@
 #include <string>
 
 namespace YJS_NAMESPACE {
-	typedef unsigned int Offset;
+	typedef int Offset;
 	typedef std::string Context;
 
 	/*

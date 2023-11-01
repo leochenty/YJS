@@ -53,11 +53,10 @@ int main()
 	{
 		test.localInsert(i, s[i]);
 	}
-	std::cout << "====start 1====" << std::endl;
 	std::cout << test.getText() << std::endl;
-	std::cout << "====start 2====" << std::endl;
+
 	for (int i = 0; i < 5; ++i) {
-		test.localDelete(0);
+		test.localDelete(i);
 	}
 
 	std::cout << test.getText() << std::endl;

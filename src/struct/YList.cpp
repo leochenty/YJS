@@ -14,19 +14,20 @@ namespace YJS_NAMESPACE {
 		// ÌØ»¯°æ±¾
 		if (++_idByItemPtr(_insertPtr) == itemMsg.id) {
 			_insertFirst->push_back(itemMsg);
+			YJS_DEBUG("nonono");
 		}
 		else {
 			ItemListPtr insertNode = new ItemList(itemMsg);
 			if (!_isEnd(_insertPtr)) {
 				ItemListPtr _insertSecond =
 					_insertFirst->subItemList(_insertPtr.second + 1);
+				YJS_DEBUG("nonono");
 
 			}
 			_insertFirst->right->left = insertNode;
 			insertNode->right = _insertFirst->right;
 			_insertFirst->right = insertNode;
 			insertNode->left = _insertFirst;
-			
 			
 		}
 
@@ -91,8 +92,9 @@ namespace YJS_NAMESPACE {
 		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
-			while (offset > 0 && p->isDelete[--offset] == 1)
-				return { p, offset };
+			while (offset > 0)
+				if(p->isDelete[--offset] == 0)
+					return { p, offset };
 			p = p->left;
 			offset = p->size;
 		} while (p);
@@ -106,12 +108,12 @@ namespace YJS_NAMESPACE {
 		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
-			while (offset < p->size) {
-				if(p->isDelete[++offset] == 0)
+			while (++offset < p->size) {
+				if(p->isDelete[offset] == 0)
 					return { p, offset };
 			}
 				
-			offset = 0;
+			offset = -1;
 			p = p->right;
 		} while (p != end().first);
 
@@ -124,6 +126,8 @@ namespace YJS_NAMESPACE {
 
 
 	ItemPtr YList::_getItemByIndex(Index index) const {
+		if (index == -1)
+			return { _head, 0 };
 		ItemPtr p = this->begin();
 		while (p != this->end() && index--)
 			p = this->successor(p);
