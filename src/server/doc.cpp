@@ -31,6 +31,8 @@ namespace YJS_NAMESPACE{
 			yStruct->getId(_insertNextPtr)
 			);
 
+		// YJS_DEBUG("¿Í»§¶Ëid:%d Ê±ÖÓ:%d", _insertItemMsg.id.client, _insertItemMsg.id.clock);
+
 		yStruct->insertItem(index - 1, _insertItemMsg);
 	}
 

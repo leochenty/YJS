@@ -30,6 +30,13 @@ namespace YJS_NAMESPACE {
 
 		void localDelete(Index index);
 
+		void testF(int index, int flag, char c) {
+			if (flag)
+				localDelete(index);
+			else
+				localInsert(index, c);
+		}
+
 		std::string getText();
 
 	};

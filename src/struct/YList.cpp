@@ -14,14 +14,16 @@ namespace YJS_NAMESPACE {
 		// 特化版本
 		if (++_idByItemPtr(_insertPtr) == itemMsg.id) {
 			_insertFirst->push_back(itemMsg);
-			YJS_DEBUG("nonono");
+			// YJS_DEBUG("特化插入");
 		}
 		else {
 			ItemListPtr insertNode = new ItemList(itemMsg);
 			if (!_isEnd(_insertPtr)) {
 				ItemListPtr _insertSecond =
 					_insertFirst->subItemList(_insertPtr.second + 1);
-				YJS_DEBUG("nonono");
+				// YJS_DEBUG("分裂");
+				//static int conut = 0;
+				//YJS_DEBUG("%d", conut++);
 
 			}
 			_insertFirst->right->left = insertNode;
@@ -144,7 +146,7 @@ namespace YJS_NAMESPACE {
 	}
 
 	Id YList::_idByItemPtr(ItemPtr item) const {
-		return item.first->headId+=item.second;
+		return item.first->headId+item.second;
 	}
 
 	//ItemPtr YList::_getItemByIndex(Index index) const
