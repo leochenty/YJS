@@ -3,9 +3,6 @@
 namespace YJS_NAMESPACE{
 	Doc::Doc(YAlloc yAlloc)
 	{
-		this->clientId = 0;
-		this->localClock = 0;
-
 		switch (yAlloc)
 		{
 		case LIST:
@@ -22,14 +19,19 @@ namespace YJS_NAMESPACE{
 		delete yStruct;
 	}
 
-	void Doc::localInsert(Index index, Text context)
+	void Doc::localInsert(Index index, char context)
 	{
 		ItemPtr _insertPtr = yStruct->getItemByPos(index);
-		Id _origin = _insertPtr->id;
-		Id _rightOrigin = yStruct->successor(_insertPtr)->id;
-		Id _insertId = Id(clientId, ++this->localClock);
-		Item _insertItem(_insertId, context, _origin, _rightOrigin);
-		yStruct->insertItem(index, _insertItem);
+		ItemPtr _insertNextPtr = yStruct->successor(_insertPtr);
+
+		ItemMessage _insertItemMsg(
+			context,
+			++localId,
+			yStruct->getId(_insertPtr),
+			yStruct->getId(_insertNextPtr)
+			);
+
+		yStruct->insertItem(index, _insertItemMsg);
 	}
 
 	void Doc::localDelete(Index index)
@@ -41,11 +43,14 @@ namespace YJS_NAMESPACE{
 
 	std::string Doc::getText()
 	{
-		ItemPtr _head = this->yStruct->begin();
+		ItemPtr _headTemp = this->yStruct->begin();
 		std::string ans;
-		while (_head!=this->yStruct->end()) {
-			ans += _head->content;
-			_head = yStruct->successor(_head);
+		while (_headTemp!=this->yStruct->end()) {
+			ans += _headTemp.first->context;
+
+			YJS_DEBUG("%d %s", _headTemp.first->headId.clock, _headTemp.first->context.c_str());
+
+			_headTemp = yStruct->successor(_headTemp);
 		}
 		return ans;
 	}

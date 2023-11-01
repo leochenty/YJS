@@ -8,11 +8,27 @@ namespace YJS_NAMESPACE {
 
 	void YList::insertItem(Index index, ItemMessage itemMsg)
 	{
-		//ItemPtr _insertPtr = _getItemByIndex(index);
-		//if (_insertPtr)
-		//{
+		ItemPtr _insertPtr = _getItemByIndex(index);
+		ItemListPtr _insertFirst = (ItemListPtr)_insertPtr.first;
 
-		//}
+		// ÌØ»¯°æ±¾
+		if (++_idByItemPtr(_insertPtr) == itemMsg.id) {
+			_insertFirst->push_back(itemMsg);
+		}
+		else {
+			ItemListPtr insertNode = new ItemList(itemMsg);
+			if (!_isEnd(_insertPtr)) {
+				ItemListPtr _insertSecond =
+					_insertFirst->subItemList(_insertPtr.second + 1);
+
+			}
+			_insertFirst->right->left = insertNode;
+			insertNode->right = _insertFirst->right;
+			_insertFirst->right = insertNode;
+			insertNode->left = _insertFirst;
+			
+			
+		}
 
 	}
 
@@ -34,7 +50,7 @@ namespace YJS_NAMESPACE {
 
 		
 		p->isDelete[_deletePtr.second] = 1;
-		--p->realSize;
+		// --p->realSize;
 	}
 
 	ItemPtr YList::getItemByPos(Index index) const
@@ -72,7 +88,7 @@ namespace YJS_NAMESPACE {
 	ItemPtr YList::predecessor(ItemPtr item) const
 	{
 		int offset = item.second;
-		ItemList* p = (ItemList*)item.first;
+		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
 			while (offset > 0 && p->isDelete[--offset] == 1)
@@ -87,23 +103,44 @@ namespace YJS_NAMESPACE {
 	ItemPtr YList::successor(ItemPtr item) const
 	{
 		int offset = item.second;
-		ItemList* p = (ItemList*)item.first;
+		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
-			while (offset < p->size && p->isDelete[++offset] == 1)
-				return { p, offset };
+			while (offset < p->size) {
+				if(p->isDelete[++offset] == 0)
+					return { p, offset };
+			}
+				
 			offset = 0;
 			p = p->right;
-		} while (p);
+		} while (p != end().first);
 
 		return this->end();
 	}
+
+	Id YList::getId(ItemPtr item) const {
+		return item.first->headId + item.second;
+	}
+
 
 	ItemPtr YList::_getItemByIndex(Index index) const {
 		ItemPtr p = this->begin();
 		while (p != this->end() && index--)
 			p = this->successor(p);
 		return p;
+	}
+
+	bool YList::_isEnd(ItemPtr item)const {
+		unsigned int _size = ((ItemListPtr)item.first)->size;
+		return item.second == _size || _size == 0;
+	}
+
+	bool YList::_isBegin(ItemPtr item)const {
+		return item.second == 0;
+	}
+
+	Id YList::_idByItemPtr(ItemPtr item) const {
+		return item.first->headId+=item.second;
 	}
 
 	//ItemPtr YList::_getItemByIndex(Index index) const

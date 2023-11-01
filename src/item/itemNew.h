@@ -17,6 +17,12 @@ namespace YJS_NAMESPACE {
 		Id id;
 		Id origin;
 		Id rightOrigin;
+
+		ItemMessage(const char character, const Id id, const Id origin, const Id rightOrigin) :
+			character(character),
+			id(id),
+			origin(origin),
+			rightOrigin(rightOrigin) {}
 	};
 
 	/*
@@ -32,12 +38,17 @@ namespace YJS_NAMESPACE {
 
 		// ItemListInterface():ItemListInterface('\0', Id(-1,-1) {}
 
-		ItemListInterface(const ItemMessage& itemMessage)
-				:context("" + itemMessage.character),
+		ItemListInterface(const ItemMessage& itemMessage):
+				context(1,itemMessage.character),
 				headId(itemMessage.id),
 				headOrigin(itemMessage.origin),
 				endRightOrigin(itemMessage.rightOrigin){}
 
+		ItemListInterface(const ItemListInterface& list, const int& offset):
+			headId(list.headId + offset),
+			endRightOrigin(list.endRightOrigin),
+			headOrigin(list.headId + (offset - 1)),
+			context(list.context.substr(offset)){}
 
 
 		virtual ~ItemListInterface() {};

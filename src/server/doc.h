@@ -20,9 +20,7 @@ namespace YJS_NAMESPACE {
 		Doc(YAlloc);
 		~Doc();
 
-		int clientId;
-		int localClock;
-
+		Id localId = {1, 0};
 
 	public:
 		

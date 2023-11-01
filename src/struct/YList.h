@@ -12,8 +12,7 @@ namespace YJS_NAMESPACE {
 			ItemList(const ItemMessage& itemMessage)
 				:ItemListInterface(itemMessage),
 				size(1),
-				realSize(1),
-				isDelete(std::vector<char>(1,0)){};
+				isDelete(1,0) {};
 
 			//ItemList(const ItemListInterface& p)
 			//	:ItemListInterface(p)
@@ -25,36 +24,70 @@ namespace YJS_NAMESPACE {
 
 			ItemList* right = nullptr;
 
-			std::vector<char> isDelete;
+			std::string isDelete;
 
 			int size;
-			int realSize;
+			// int realSize;
+
+			void push_back(ItemMessage itemMsg) {
+				++size;
+				isDelete.push_back(0);
+				context.push_back(itemMsg.character);
+			};
+
+			ItemList(const ItemList& itemlist, const int& offset) :
+				ItemListInterface(itemlist, offset),
+				size(itemlist.size - offset),
+				isDelete(itemlist.isDelete.substr(offset)),
+				left(const_cast<ItemList*>(&itemlist)),
+				right(itemlist.right)
+			{}
+
+			ItemList* subItemList(int offset) {
+				ItemList* _temp = new ItemList(*this, offset);
+				this->context.resize(offset);
+				this->endRightOrigin = this->headId + offset;
+				this->size = offset;
+				this->right = _temp;
+				this->isDelete.resize(offset);
+				return _temp;
+			}
 		};
 
 		typedef unsigned int Size;
 		typedef ItemList* ItemListPtr;
 
-		ItemListPtr head;
+		ItemListPtr _head;
+		ItemListPtr _end;
 
 		YList() {
-			head = new ItemList(
-				ItemMessage{ '\0', Id(-1,-1) , Id(-1, -1), Id(-1, -1) });
-			head->left = head;
-			head->right = head;
+			_head = new ItemList(
+				ItemMessage{ 'H', Id(1301,0) , Id(0, 0), Id(1209, 0) });
+			_end = new ItemList(
+				ItemMessage{ 'E', Id(1209,0) , Id(1301, 0), Id(0, 0) });
+			//_head->size = 0;
+			//_head->right = _end;
+			//_end->size = 0;
+			//_end->left = _head;
+			_head->left = _head;
+			_head->right = _head;
+			_head->size = 0;
+
 		};
 		virtual ~YList() {
-			delete head;
+			delete _head;
+			delete _end;
 		};
 
 		//Size size = 0;
 
 
 		virtual inline ItemPtr begin() const override {
-			return ItemPtr(head->right, 0);
+			return ItemPtr(_head->right, 0);
 		};
 
 		virtual inline ItemPtr end() const override {
-			return ItemPtr(head, 0);
+			return ItemPtr(_head, 0);
 		};
 
 		virtual void insertItem(Index index, ItemMessage itemMsg) override;
@@ -77,8 +110,15 @@ namespace YJS_NAMESPACE {
 
 		virtual ItemPtr successor(ItemPtr item) const override;
 
+		virtual Id getId(ItemPtr itemPtr) const override;
 
 	private:
-		ItemPtr _getItemByIndex(int index) const;
+		ItemPtr _getItemByIndex(Index index) const;
+
+		bool _isEnd(ItemPtr item) const;
+
+		bool _isBegin(ItemPtr item) const;
+
+		Id _idByItemPtr(ItemPtr item) const;
 	};
 }

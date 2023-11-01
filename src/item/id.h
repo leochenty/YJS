@@ -19,6 +19,25 @@ namespace YJS_NAMESPACE{
 			ClientId client = 0;
 			Clock clock = 0;
 
+			Id& operator++() {
+				++this->clock;
+				return *this;
+			}
+
+			bool operator==(const Id& id) const{
+				return id.client == this->client && id.clock == this->clock;
+			}
+
+			Id operator+(const int &offset) const {
+				return Id(this->client, this->clock+offset);
+			}
+
+			Id& operator+=(int offset) {
+				this->clock+=offset;
+				return *this;
+			}
+			
+
 
 		};
 
