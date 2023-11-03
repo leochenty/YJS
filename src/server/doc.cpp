@@ -26,20 +26,48 @@ namespace YJS_NAMESPACE{
 	{
 		//ItemPtr _insertPtr = yStruct->getItemByPos(index);
 		//ItemPtr _insertNextPtr = yStruct->successor(_insertPtr);
-
-		ItemPtr _insertNextPtr =  yStruct->getItemByPos(index);
-		ItemPtr _insertPtr = yStruct->predecessor(_insertNextPtr);
-
+		// =======================================
 		ItemMessage _insertItemMsg(
 			context,
 			++localId,
-			yStruct->getId(_insertPtr),
-			yStruct->getId(_insertNextPtr)
-			);
+			Id(-1,0),
+			Id(-1,0)
+		);
 
-		// YJS_DEBUG("客户端id:%d 时钟:%d", _insertItemMsg.id.client, _insertItemMsg.id.clock);
+		ItemPtr _insertNextPtr = yStruct->getItemByPos(index), _insertPtr;
+		if (_insertNextPtr.first == nullptr){
+			if (index != 0) {
+				_insertPtr = yStruct->getItemByPos(index - 1);
+				_insertItemMsg.origin = yStruct->getId(_insertPtr);
+			}			
+		}
+		else {
+			_insertItemMsg.rightOrigin = yStruct->getId(_insertNextPtr);
+			if (index != 0) {
+				_insertPtr = yStruct->getItemByPos(index - 1);
+				_insertItemMsg.origin = yStruct->getId(_insertPtr);
+			}
+		}
 
 		yStruct->insertItem(index, _insertItemMsg);
+
+
+
+
+		// =======================================
+		//ItemPtr _insertNextPtr =  yStruct->getItemByPos(index);
+		//ItemPtr _insertPtr = yStruct->predecessor(_insertNextPtr);
+
+		//ItemMessage _insertItemMsg(
+		//	context,
+		//	++localId,
+		//	yStruct->getId(_insertPtr),
+		//	yStruct->getId(_insertNextPtr)
+		//	);
+
+		// // YJS_DEBUG("客户端id:%d 时钟:%d", _insertItemMsg.id.client, _insertItemMsg.id.clock);
+
+		//yStruct->insertItem(index, _insertItemMsg);
 	}
 
 	void Doc::localDelete(Index index)

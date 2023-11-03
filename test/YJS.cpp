@@ -45,8 +45,10 @@ int main()
 	for (int i = 0; i < MAX; i++){
 		std::tuple<int, int, char> p = data[i];
 		
-		if (i % 100 == 0)
-			std::cout << ((double)i / MAX) << std::endl;
+		// if (i % 100 == 0)
+		std::cout << ((double)i / MAX) << std::endl;
+		std::cout << test.getText() << std::endl;
+		std::cout << std::endl;
 		std::apply([&test](int a, int b, char c) {
 			test.testF(a,b,c);
 		}, p);

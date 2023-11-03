@@ -159,7 +159,7 @@ namespace YJS_NAMESPACE {
             if (splitIdx == 0) {
                 insertLeaf->SetRightOfLeaf(originLeaf);
                 insertLeaf->SetLeftOfLeaf(originLeaf->GetLeftOfLeaf());
-
+                originLeaf->SetLeftOfLeaf(insertLeaf);
                 updateLeafParent(insertLeaf, originLeaf, nullptr, parent, path.top(), idx);
             }
             else {
