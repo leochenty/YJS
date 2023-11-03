@@ -8,7 +8,7 @@ using YJS_NAMESPACE::Doc;
 using YJS_NAMESPACE::YAlloc;
 
 // 259778
-constexpr int MAX = 100;
+constexpr int MAX = 10000;
 
 
 int main()

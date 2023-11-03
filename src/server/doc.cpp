@@ -24,8 +24,11 @@ namespace YJS_NAMESPACE{
 
 	void Doc::localInsert(Index index, char context)
 	{
-		ItemPtr _insertPtr = yStruct->getItemByPos(index - 1);
-		ItemPtr _insertNextPtr = yStruct->successor(_insertPtr);
+		//ItemPtr _insertPtr = yStruct->getItemByPos(index);
+		//ItemPtr _insertNextPtr = yStruct->successor(_insertPtr);
+
+		ItemPtr _insertNextPtr =  yStruct->getItemByPos(index);
+		ItemPtr _insertPtr = yStruct->predecessor(_insertNextPtr);
 
 		ItemMessage _insertItemMsg(
 			context,
@@ -36,7 +39,7 @@ namespace YJS_NAMESPACE{
 
 		// YJS_DEBUG("¿Í»§¶Ëid:%d Ê±ÖÓ:%d", _insertItemMsg.id.client, _insertItemMsg.id.clock);
 
-		yStruct->insertItem(index - 1, _insertItemMsg);
+		yStruct->insertItem(index, _insertItemMsg);
 	}
 
 	void Doc::localDelete(Index index)

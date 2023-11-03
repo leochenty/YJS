@@ -8,7 +8,7 @@ namespace YJS_NAMESPACE {
 
 	void YList::insertItem(Index index, ItemMessage itemMsg)
 	{
-		ItemPtr _insertPtr = _getItemByIndex(index);
+		ItemPtr _insertPtr = predecessor(_getItemByIndex(index));
 		ItemListPtr _insertFirst = (ItemListPtr)_insertPtr.first;
 
 		// ÌØ»¯°æ±¾
@@ -94,14 +94,14 @@ namespace YJS_NAMESPACE {
 		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
-			while (offset > 0)
-				if(p->isDelete[--offset] == 0)
+			while (--offset >= 0)
+				if(p->isDelete[offset] == 0)
 					return { p, offset };
 			p = p->left;
 			offset = p->size;
-		} while (p);
+		} while (p != _head );
 
-		return this->end();
+		return { _head, 0 };;
 	}
 
 	ItemPtr YList::successor(ItemPtr item) const
@@ -128,8 +128,6 @@ namespace YJS_NAMESPACE {
 
 
 	ItemPtr YList::_getItemByIndex(Index index) const {
-		if (index == -1)
-			return { _head, 0 };
 		ItemPtr p = this->begin();
 		while (p != this->end() && index--)
 			p = this->successor(p);
