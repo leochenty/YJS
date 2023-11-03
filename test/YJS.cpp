@@ -7,14 +7,14 @@
 using YJS_NAMESPACE::Doc;
 using YJS_NAMESPACE::YAlloc;
 
-
-constexpr int MAX = 200000;
+// 259778
+constexpr int MAX = 100;
 
 
 int main()
 {	
 
-	Doc test(YAlloc::LIST);
+	Doc test(YAlloc::BTREE);
 
 	std::ifstream infile(".\\..\\..\\..\\test\\output_for_cin.txt", std::ios::in);
 	if (!infile) {
@@ -39,14 +39,14 @@ int main()
 			data[i] = std::make_tuple(a, b, '\0');
 	}
 
-	std::cout << n << std::endl;
+	std::cout << MAX <<'/' << n << std::endl;
 	system("pause");
 
-	for (int i = 0; i < n; i++){
+	for (int i = 0; i < MAX; i++){
 		std::tuple<int, int, char> p = data[i];
 		
 		if (i % 100 == 0)
-			std::cout << ((double)i / n) << std::endl;
+			std::cout << ((double)i / MAX) << std::endl;
 		std::apply([&test](int a, int b, char c) {
 			test.testF(a,b,c);
 		}, p);

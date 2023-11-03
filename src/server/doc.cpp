@@ -8,6 +8,9 @@ namespace YJS_NAMESPACE{
 		case LIST:
 			yStruct = new YList;
 			break;
+		case BTREE:
+			yStruct = new BPlusTree;
+			break;
 		default:
 			break;
 		}

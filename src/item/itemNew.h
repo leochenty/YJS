@@ -5,6 +5,7 @@
 #include "src/item/id.h"
 #include <string>
 
+
 namespace YJS_NAMESPACE {
 	typedef int Offset;
 	typedef std::string Context;
@@ -36,7 +37,11 @@ namespace YJS_NAMESPACE {
 		Id headOrigin;
 		Id endRightOrigin;
 
-		// ItemListInterface():ItemListInterface('\0', Id(-1,-1) {}
+		ItemListInterface() :
+			headId(Id(-1, -1)),
+			headOrigin(Id(-1, -1)),
+			endRightOrigin(Id(-1, -1))
+		{};
 
 		ItemListInterface(const ItemMessage& itemMessage):
 				context(1,itemMessage.character),

@@ -10,7 +10,7 @@ namespace YJS_NAMESPACE{
 		{
 		public:
 
-			// Id() {};
+			Id() {};
 			~Id() {};
 
 			Id(int client, int clock)

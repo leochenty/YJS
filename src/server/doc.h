@@ -2,6 +2,8 @@
 
 #include "src/struct/YList.h"
 
+#include "src/struct/BPlusTree.h"
+
 #include "src/server/transaction.h"
 
 #include <string>
@@ -12,7 +14,7 @@ namespace YJS_NAMESPACE {
 	enum YAlloc
 	{
 		LIST,
-
+		BTREE,
 	};
 
 	class Doc{

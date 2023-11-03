@@ -16,7 +16,9 @@ include_directories(
 
 add_library(common1 STATIC 
     "src/struct/YList.cpp"
+    "src/struct/BPlusTree.cpp"
 )
+
 
 add_library(common2 STATIC 
     "src/server/doc.cpp"
