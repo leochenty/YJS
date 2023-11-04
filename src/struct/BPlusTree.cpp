@@ -77,7 +77,7 @@ namespace YJS_NAMESPACE {
         }
         else
         {
-            cout << "没找到该节点" << endl;
+            cout << "node not found" << endl;
             return { 0, nullptr };
         }
     }
@@ -92,33 +92,49 @@ namespace YJS_NAMESPACE {
 
         TreeNode* cursor = BT_root;
         int remain = pos + 1; 
-        while (!(cursor->isleaf))
-        {
-            int i = 0;
-            vector<unsigned int> offsetList = cursor->GetOffset();
-            for (; i < (int)offsetList.size(); i++)
-            {
-                int offset = offsetList[i];
-                remain -= offset;
-                if (remain <= 0) {
+        // insert in the end
+		if ((remain -1) == cursor->GetSum())
+		{
+            vector<unsigned int> offset;
+			int i = 0;
+			while (!cursor->isleaf)
+			{
+				offset = cursor->GetOffset();
+				for (i = offset.size() - 1; i >= 0; i--) {
+					if (offset[i] != 0)
+					{
+						path.push(i);
+						cursor = cursor->GetChild()[i];
+						break;
+					}
+				}
 
-                    remain += offset;
-                    break;
-                }
+			}
+            return make_tuple(cursor->GetNode().size() + 1, cursor, path);
+		}
+		else
+		{
+			while (!(cursor->isleaf))
+			{
+				int i = 0;
+				vector<unsigned int> offsetList = cursor->GetOffset();
+				for (; i < (int)offsetList.size(); i++)
+				{
+					int offset = offsetList[i];
+					remain -= offset;
+					if (remain <= 0) {
 
-            }
-            // 
-            if (i == (int)offsetList.size()) {
-                i--;
-                remain = offsetList[i] + 1;
-            }
+						remain += offset;
+						break;
+					}
 
-            path.push(i); 
-            cursor = cursor->GetChild()[i];
+				}
+				path.push(i);
+				cursor = cursor->GetChild()[i];
+			}
 
-        }
-
-        return make_tuple(remain, cursor, path);
+			return make_tuple(remain, cursor, path);
+		}
     }
 
 
@@ -159,6 +175,10 @@ namespace YJS_NAMESPACE {
             if (splitIdx == 0) {
                 insertLeaf->SetRightOfLeaf(originLeaf);
                 insertLeaf->SetLeftOfLeaf(originLeaf->GetLeftOfLeaf());
+                if (originLeaf->GetLeftOfLeaf() != nullptr)
+                {
+                    originLeaf->GetLeftOfLeaf()->SetRightOfLeaf(insertLeaf);
+                }
                 originLeaf->SetLeftOfLeaf(insertLeaf);
                 updateLeafParent(insertLeaf, originLeaf, nullptr, parent, path.top(), idx);
             }
@@ -167,6 +187,10 @@ namespace YJS_NAMESPACE {
 
                 if (splitIdx == (int)originLeaf->GetNode().size()) {
                     insertLeaf->SetRightOfLeaf(originLeaf->GetRightOfLeaf());
+                    if (originLeaf->GetRightOfLeaf() != nullptr)
+                    {
+                        originLeaf->GetRightOfLeaf()->SetLeftOfLeaf(insertLeaf);
+                    }
                 }
                 else {
                     rightLeaf = new LeafNode;
@@ -181,7 +205,10 @@ namespace YJS_NAMESPACE {
                     rightLeaf->parent = parent;
                     rightLeaf->SetLeftOfLeaf(insertLeaf);
                     rightLeaf->SetRightOfLeaf(originLeaf->GetRightOfLeaf());
-
+                    if (originLeaf->GetRightOfLeaf() != nullptr)
+                    {
+                        originLeaf->GetRightOfLeaf()->SetLeftOfLeaf(rightLeaf);
+                    }          
                     insertLeaf->SetRightOfLeaf(rightLeaf);
 
                     originDeleted = originLeaf->GetDeleted();
@@ -189,6 +216,7 @@ namespace YJS_NAMESPACE {
                     originLeaf->SetDeleted(originDeleted);
                     originLeaf->SetNode(originLeaf->GetNode().substr(0, splitIdx));
                 }
+
                 originLeaf->SetRightOfLeaf(insertLeaf);
                 updateLeafParent(originLeaf, insertLeaf, rightLeaf, parent, path.top(), idx);
 
@@ -226,7 +254,10 @@ namespace YJS_NAMESPACE {
             rightLeaf->parent = parent;
             rightLeaf->SetLeftOfLeaf(originLeaf);
             rightLeaf->SetRightOfLeaf(originLeaf->GetRightOfLeaf());
-
+            if (originLeaf->GetRightOfLeaf()!= nullptr)
+            {
+                originLeaf->GetRightOfLeaf()->SetLeftOfLeaf(rightLeaf);
+            }
             originDeleted = originLeaf->GetDeleted();
             originDeleted.assign(originDeleted.begin(), originDeleted.begin() + splitIdx + 1);
             originLeaf->SetDeleted(originDeleted);
@@ -436,6 +467,7 @@ namespace YJS_NAMESPACE {
 
     void BPlusTree::insertItem(Index index, ItemMessage itemMsg)
     {
+        /*
         if (BT_root == nullptr && PoolId.clock == 0 && PoolId.client == 0) {
             PoolId = itemMsg.id;
             insertIndex = index;
@@ -473,7 +505,8 @@ namespace YJS_NAMESPACE {
             Pool[0] = ch;
             PoolSize = 1;
         }
-
+        */
+        insert(index, string(1, itemMsg.character), itemMsg.id);
     }
 
 
