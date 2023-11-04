@@ -8,7 +8,7 @@ using YJS_NAMESPACE::Doc;
 using YJS_NAMESPACE::YAlloc;
 
 // 259778
-constexpr int MAX = 10000;
+constexpr int MAX = 259778;
 
 
 int main()
@@ -44,11 +44,11 @@ int main()
 
 	for (int i = 0; i < MAX; i++){
 		std::tuple<int, int, char> p = data[i];
-		
+
 		// if (i % 100 == 0)
 		std::cout << ((double)i / MAX) << std::endl;
-		std::cout << test.getText() << std::endl;
-		std::cout << std::endl;
+		//std::cout << test.getText() << std::endl;
+		//std::cout << std::endl;
 		std::apply([&test](int a, int b, char c) {
 			test.testF(a,b,c);
 		}, p);
@@ -59,7 +59,7 @@ int main()
 
 	std::cout << test.getText() << std::endl;
 
-	
+
 	system("pause");
 
 	//std::string s = "hello world!";
