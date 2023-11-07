@@ -1,7 +1,8 @@
 #include "src/server/doc.h"
 
 namespace YJS_NAMESPACE{
-	Doc::Doc(YAlloc yAlloc)
+	Doc::Doc(YAlloc yAlloc):
+		yStruct(nullptr)
 	{
 		switch (yAlloc)
 		{
@@ -11,6 +12,8 @@ namespace YJS_NAMESPACE{
 		case BTREE:
 			yStruct = new BPlusTree;
 			break;
+		case LISTNEW:
+			yStruct = new YListNew;
 		default:
 			break;
 		}
@@ -34,20 +37,20 @@ namespace YJS_NAMESPACE{
 			Id(-1,0)
 		);
 
-		ItemPtr _insertNextPtr = yStruct->getItemByPos(index), _insertPtr;
-		if (_insertNextPtr.first == nullptr){
-			if (index != 0) {
-				_insertPtr = yStruct->getItemByPos(index - 1);
-				_insertItemMsg.origin = yStruct->getId(_insertPtr);
-			}			
-		}
-		else {
-			_insertItemMsg.rightOrigin = yStruct->getId(_insertNextPtr);
-			if (index != 0) {
-				_insertPtr = yStruct->getItemByPos(index - 1);
-				_insertItemMsg.origin = yStruct->getId(_insertPtr);
-			}
-		}
+		//ItemPtr _insertNextPtr = yStruct->getItemByPos(index), _insertPtr;
+		//if (_insertNextPtr.first == nullptr){
+		//	if (index != 0) {
+		//		_insertPtr = yStruct->getItemByPos(index - 1);
+		//		_insertItemMsg.origin = yStruct->getId(_insertPtr);
+		//	}			
+		//}
+		//else {
+		//	_insertItemMsg.rightOrigin = yStruct->getId(_insertNextPtr);
+		//	if (index != 0) {
+		//		_insertPtr = yStruct->getItemByPos(index - 1);
+		//		_insertItemMsg.origin = yStruct->getId(_insertPtr);
+		//	}
+		//}
 
 		yStruct->insertItem(index, _insertItemMsg);
 
@@ -83,6 +86,7 @@ namespace YJS_NAMESPACE{
 		std::string ans;
 		while (_headTemp!=this->yStruct->end()) {
 			ans += _headTemp.first->context[_headTemp.second];
+
 			_headTemp = yStruct->successor(_headTemp);
 		}
 		return ans;

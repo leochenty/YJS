@@ -41,6 +41,9 @@ namespace YJS_NAMESPACE {
 
 		virtual void insertItem(Index index, ItemMessage itemMsg) = 0;
 
+		// 这是一种优化方法，减少本地插入的调用次数，提高插入效率
+		virtual void insertItem(Index index, char itemChar, Id id) {};
+
 		//virtual void insertItem(ItemPtr item) = 0;
 
 		virtual void deleteItem(Index index) = 0;

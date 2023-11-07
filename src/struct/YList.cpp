@@ -14,14 +14,14 @@ namespace YJS_NAMESPACE {
 		// 特化版本
 		if (++_idByItemPtr(_insertPtr) == itemMsg.id) {
 			_insertFirst->push_back(itemMsg);
-			// YJS_DEBUG("特化插入");
+			YJS_DEBUG("特化插入");
 		}
 		else {
 			ItemListPtr insertNode = new ItemList(itemMsg);
 			if (!_isEnd(_insertPtr)) {
 				ItemListPtr _insertSecond =
 					_insertFirst->subItemList(_insertPtr.second + 1);
-				// YJS_DEBUG("分裂");
+				YJS_DEBUG("分裂");
 				//static int conut = 0;
 				//YJS_DEBUG("%d", conut++);
 
@@ -98,7 +98,7 @@ namespace YJS_NAMESPACE {
 				if(p->isDelete[offset] == 0)
 					return { p, offset };
 			p = p->left;
-			offset = p->size;
+			offset = p->_size;
 		} while (p != _head );
 
 		return { _head, 0 };;
@@ -110,7 +110,7 @@ namespace YJS_NAMESPACE {
 		ItemListPtr p = (ItemListPtr)item.first;
 		do
 		{
-			while (++offset < p->size) {
+			while (++offset < p->_size) {
 				if(p->isDelete[offset] == 0)
 					return { p, offset };
 			}
@@ -135,8 +135,8 @@ namespace YJS_NAMESPACE {
 	}
 
 	bool YList::_isEnd(ItemPtr item)const {
-		unsigned int _size = ((ItemListPtr)item.first)->size;
-		return item.second == _size || _size == 0;
+		int _size = ((ItemListPtr)item.first)->_size - 1;
+		return item.second == _size || _size == -1;
 	}
 
 	bool YList::_isBegin(ItemPtr item)const {

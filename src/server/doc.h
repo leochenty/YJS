@@ -4,6 +4,8 @@
 
 #include "src/struct/BPlusTree.h"
 
+#include "src/struct/YListNew.h"
+
 #include "src/server/transaction.h"
 
 #include <string>
@@ -15,6 +17,7 @@ namespace YJS_NAMESPACE {
 	{
 		LIST,
 		BTREE,
+		LISTNEW,
 	};
 
 	class Doc{
@@ -31,13 +34,6 @@ namespace YJS_NAMESPACE {
 		void localInsert(Index index, char context);
 
 		void localDelete(Index index);
-
-		void testF(int index, int flag, char c) {
-			if (flag)
-				localDelete(index);
-			else
-				localInsert(index, c);
-		}
 
 		std::string getText();
 
