@@ -2,7 +2,7 @@
 
 namespace YJS_NAMESPACE {
 
-    char Pool[STRING_POOL_MAX] = { '\0' };
+    char Pool[STRING_POOL_MAX + 1] = { '\0' };
     Id PoolId = {}; 
     int PoolSize = 0;
     int insertIndex = 0; 
@@ -73,11 +73,12 @@ namespace YJS_NAMESPACE {
         tuple<int, TreeNode*, stack<int>> result = getShiftByPos(pos);
         int remain = get<0>(result);
         if (remain > 0) {
+            if (remain == get<1>(result)->GetNode().size() + 1) remain--;
             return { remain - 1, get<1>(result) };
         }
         else
         {
-            cout << "node not found" << endl;
+            //cout << "node not found" << endl;
             return { 0, nullptr };
         }
     }
@@ -268,22 +269,31 @@ namespace YJS_NAMESPACE {
 
         int updateIdx = path.top();
         path.pop();
-
+        int len = 0;
+        for (char del : originLeaf->GetDeleted())
+        {
+            len += (int)del;
+        }
         vector<unsigned int> offset = parent->GetOffset();
-        offset[updateIdx] = originLeaf->GetNode().size() - 1;
+        offset[updateIdx] = originLeaf->GetNode().size() - len;
         parent->SetOffset(offset);
-        parent->SetSum(parent->GetSum() - 1);
+        parent->SetSum(parent->GetSum() -len);
 
         if (rightLeaf != nullptr) {
             offset = parent->GetOffset();
-            offset.insert(offset.begin() + updateIdx + 1, (int)rightLeaf->GetNode().size());
+            int len = 0;
+            for (char det : rightLeaf->GetDeleted())
+            {
+                len += (int)det;
+            }
+            offset.insert(offset.begin() + updateIdx + 1, (int)(rightLeaf->GetNode().size()-len));
             parent->SetOffset(offset);
             vector<TreeNode*> child = parent->GetChild();
             child.insert(child.begin() + updateIdx + 1, rightLeaf);
             parent->SetChild(child);
         }
 
-        insertInternal(parent, path, -1);
+        insertInternal(parent, path, -1); 
     }
 
     void BPlusTree::insertInternal(TreeNode* cursor, stack<int> path, int length) {
@@ -368,7 +378,12 @@ namespace YJS_NAMESPACE {
     void BPlusTree::updateLeafParent(TreeNode* leftLeaf, TreeNode* middleLeaf, TreeNode* rightLeaf, TreeNode* parent, int updateIdx, int length)
     {
         vector<unsigned int> offset = parent->GetOffset();
-        offset[updateIdx] = (int)leftLeaf->GetNode().size();
+        int len = 0;
+        for (char det : leftLeaf->GetDeleted())
+        {
+            len += (int)det;
+        }
+        offset[updateIdx] = (int)(leftLeaf->GetNode().size() - len);
         vector<TreeNode*> child = parent->GetChild();
         child[updateIdx] = leftLeaf;
 
@@ -378,7 +393,12 @@ namespace YJS_NAMESPACE {
         child.insert(child.begin() + updateIdx + 1, middleLeaf);
         parent->SetChild(child);
 
-        int middleOffsetNum = (int)middleLeaf->GetNode().size();
+        len = 0;
+        for (char det : middleLeaf->GetDeleted())
+        {
+            len += (int)det;
+        }
+        int middleOffsetNum = (int)middleLeaf->GetNode().size()-len;
         offset.insert(offset.begin() + updateIdx + 1, middleOffsetNum);
         parent->SetOffset(offset);
 
@@ -389,8 +409,12 @@ namespace YJS_NAMESPACE {
         {
             child.insert(child.begin() + updateIdx + 2, rightLeaf);
             parent->SetChild(child);
-
-            int middleOffset = (int)rightLeaf->GetNode().size();
+            len = 0;
+            for (char det:rightLeaf->GetDeleted())
+            {
+                len += (int)det;
+            }
+            int middleOffset = (int)(rightLeaf->GetNode().size()-len);
             offset.insert(offset.begin() + updateIdx + 2, middleOffset);
             parent->SetOffset(offset);
         }
@@ -467,16 +491,16 @@ namespace YJS_NAMESPACE {
 
     void BPlusTree::insertItem(Index index, ItemMessage itemMsg)
     {
-        /*
-        if (BT_root == nullptr && PoolId.clock == 0 && PoolId.client == 0) {
+        /*加入了缓存*/
+        if (PoolSize == 0) {
             PoolId = itemMsg.id;
             insertIndex = index;
         }
+        
         char ch = itemMsg.character;
         Id id = itemMsg.id;
-        if (id.client == PoolId.client && id.clock == PoolId.clock)
+        if (id.client == PoolId.client && id.clock == PoolId.clock && index == insertIndex)
         {
-            PoolId.clock++;
             if (PoolSize < STRING_POOL_MAX)
             {
                 Pool[PoolSize] = ch;
@@ -486,36 +510,57 @@ namespace YJS_NAMESPACE {
             {
                 id.clock -= PoolSize;
                 string contents = Pool;
-                insert(insertIndex, contents, id);
-                insertIndex += PoolSize;
+                insert(insertIndex - PoolSize, contents, id);
                 for (int i = 0; i < PoolSize; i++) { Pool[i] = '\0'; }
                 Pool[0] = ch;
                 PoolSize = 1;
             }
+            insertIndex++;
+            PoolId.clock++;
+            
         }
         else
         {
             PoolId.clock -= PoolSize;
             string contents = Pool;
-            insert(insertIndex, contents, PoolId);
+            insert(insertIndex - PoolSize, contents, PoolId);
             PoolId = id;
+            insertIndex = index + 1;
             PoolId.clock++;
-            insertIndex += PoolSize;
             for (int i = 0; i < PoolSize; i++) { Pool[i] = '\0'; }
             Pool[0] = ch;
             PoolSize = 1;
         }
-        */
-        insert(index, string(1, itemMsg.character), itemMsg.id);
+        
+        //insert(index, string(1, itemMsg.character), itemMsg.id);
     }
 
 
     ItemPtr BPlusTree::getItemByPos(Index index) const
     {
-        pair<int, TreeNode*> res = getLeafByPos(index);
-        TreeNode* leaf = res.second;
-        ItemListInterface* Item = (LeafNode*)leaf;
-        return make_pair(Item, res.first);
+        /*先看是在缓存中*/
+        if (PoolSize != 0 && index >= (insertIndex - PoolSize) && index < insertIndex) {
+            LeafNode leaf;
+            int offset = index - (insertIndex - PoolSize);
+            leaf.context = Pool[offset];
+            Id id = PoolId;
+            id.clock -= offset;
+            leaf.SetGID(id);
+            ItemListInterface* Item = &leaf;
+            return make_pair(Item, offset);
+        }
+        else
+        {   // 如果查找的还未插入
+            if (PoolSize != 0 && index >= (insertIndex - PoolSize))
+            {
+                index -= PoolSize;
+            }
+            pair<int, TreeNode*> res = getLeafByPos(index);
+            TreeNode* leaf = res.second;
+            ItemListInterface* Item = (LeafNode*)leaf;
+            return make_pair(Item, res.first);
+        }
+
     }
 
     ItemPtr BPlusTree::predecessor(ItemPtr itemPtr) const
@@ -559,8 +604,7 @@ namespace YJS_NAMESPACE {
             Id id = PoolId;
             id.clock -= PoolSize;
             string contents = Pool;
-            insert(insertIndex, contents, id);
-            insertIndex += PoolSize;
+            insert(insertIndex - PoolSize, contents, id);
             for (int i = 0; i < PoolSize; i++) { Pool[i] = '\0'; }
             PoolSize = 0;
         }
