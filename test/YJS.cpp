@@ -70,6 +70,7 @@ int main()
 		
 		//std::cout << std::get<0>(p)<< ' ' << std::get<1>(p) << ' ' << (char)std::get<2>(p) << std::endl;
 	}
+	((YJS_NAMESPACE::BPlusTree *)test.yStruct)->checkPool();
 	clock_t endTest = clock();
 	
 	std::cout << test.getText() << std::endl;

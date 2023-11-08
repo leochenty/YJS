@@ -6,8 +6,8 @@
 
 namespace YJS_NAMESPACE {
 
-    constexpr auto MAX_INTERNAL_SIZE = 5;
-    constexpr auto STRING_POOL_MAX = 20;
+    constexpr auto MAX_INTERNAL_SIZE = 75;
+    constexpr auto STRING_POOL_MAX = 10;
 
     using namespace std;
 
