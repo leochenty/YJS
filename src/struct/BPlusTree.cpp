@@ -1,7 +1,8 @@
 #include "src/struct/BPlusTree.h"
 
 namespace YJS_NAMESPACE {
-
+    int memoryInternal = 0;
+    int memoryLeaf = 0;
     char Pool[STRING_POOL_MAX + 1] = { '\0' };
     Id PoolId = {}; 
     int PoolSize = 0;
@@ -42,6 +43,14 @@ namespace YJS_NAMESPACE {
                 pNode->FreeChildren();
             }
             if (pNode != nullptr) {
+                if (!pNode->isleaf)
+                {
+                    memoryInternal += sizeof(*((InternalNode*)pNode));
+                }
+                else
+                {
+                    memoryLeaf += sizeof(*((LeafNode*)pNode));
+                }
                 delete pNode;
             }
         }
@@ -57,10 +66,15 @@ namespace YJS_NAMESPACE {
         if (nullptr != BT_root) {
             BT_root->FreeChildren();
             if (BT_root != nullptr) {
+                memoryInternal += sizeof(*((InternalNode*)BT_root));
                 delete BT_root;
             }
         }
         BT_root = nullptr;
+        cout << "B+ Tree:" << endl;
+        cout <<"InternalNode size: "<< memoryInternal / 1024<< "KB" << endl;
+        cout <<"LeafNode size: "<< memoryLeaf / 1024<< "KB" << endl;
+        cout <<"Total size: "<< (memoryInternal + memoryLeaf) / 1024<< "KB" << endl;
     }
 
     Id BPlusTree::getId(ItemPtr itemPtr) const
