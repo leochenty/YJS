@@ -7,13 +7,16 @@ namespace YJS_NAMESPACE{
 		switch (yAlloc)
 		{
 		case LIST:
-			yStruct = new YList;
+			// yStruct = new YList;
 			break;
 		case BTREE:
 			yStruct = new BPlusTree;
 			break;
 		case LISTNEW:
 			yStruct = new YListNew;
+			break;
+		case AVLTREE:
+			yStruct = new AVLTree;
 		default:
 			break;
 		}
@@ -88,6 +91,17 @@ namespace YJS_NAMESPACE{
 			ans += _headTemp.first->context[_headTemp.second];
 
 			_headTemp = yStruct->successor(_headTemp);
+		}
+		return ans;
+	}
+
+	std::string Doc::getText2() {
+		ItemPtr _headTemp = this->yStruct->begin();
+		string ans;
+		while (_headTemp != this->yStruct->end()) {
+			AVLNode* node = (AVLNode*)_headTemp.first;
+			ans += node->getText()[_headTemp.second];
+			_headTemp = this->yStruct->successor(_headTemp);
 		}
 		return ans;
 	}

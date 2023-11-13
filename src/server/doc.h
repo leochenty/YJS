@@ -6,6 +6,8 @@
 
 #include "src/struct/YListNew.h"
 
+#include "src/struct/AVLTree.h"
+
 #include "src/server/transaction.h"
 
 #include <string>
@@ -18,6 +20,7 @@ namespace YJS_NAMESPACE {
 		LIST,
 		BTREE,
 		LISTNEW,
+		AVLTREE,
 	};
 
 	class Doc{
@@ -36,6 +39,8 @@ namespace YJS_NAMESPACE {
 		void localDelete(Index index);
 
 		std::string getText();
+
+		std::string getText2();
 
 	};
 	

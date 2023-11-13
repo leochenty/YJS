@@ -13,6 +13,9 @@ using YJS_NAMESPACE::YAlloc;
 // 125287 125300
 constexpr int MAX = 259778;
 
+void testF(Doc& test, std::vector<std::tuple<int, int, char>> data);
+
+
 
 int main()
 {	
@@ -21,13 +24,13 @@ int main()
 	
 	Doc test2(YAlloc::LISTNEW);
 
+	Doc test3(YAlloc::AVLTREE);
+
 	std::ifstream infile(".\\..\\..\\..\\test\\output_for_cin.txt", std::ios::in);
 	if (!infile) {
 		std::cerr << "无法打开文件" << std::endl;
 		return 1;
 	}
-
-	
 
 	int n;
 	infile >> n;
@@ -44,71 +47,16 @@ int main()
 			data[i] = std::make_tuple(a, b, '\0');
 	}
 
-	std::cout << MAX <<'/' << n << std::endl;
+	std::cout << "数据量：" << MAX << '/' << n << std::endl;
+	std::cout << std::endl;
 	//system("pause");
 
-	clock_t beginTest = clock();
+	testF(test, data);
 
-	for (int i = 0; i < MAX; i++){
-		// if (i % 100 == 0)
-		// std::cout << ((double)i / MAX) << std::endl;
-		//std::cout << test.getText() << std::endl;
-		//std::cout << std::endl;
+	testF(test2, data);
 
-		/*if (i == 26353) {
-			std::cout << 1;
-		}*/
+	testF(test3, data);
 
-
-
-		std::apply([&test](int a, int b, char c) {
-			if (b == 0)
-				test.localInsert(a, c);
-			else
-				test.localDelete(a);
-		}, data[i]);
-		
-		//std::cout << std::get<0>(p)<< ' ' << std::get<1>(p) << ' ' << (char)std::get<2>(p) << std::endl;
-	}
-	((YJS_NAMESPACE::BPlusTree *)test.yStruct)->checkPool();
-	clock_t endTest = clock();
-	
-	std::cout << test.getText() << std::endl;
-	double duration = double(endTest - beginTest) / CLK_TCK;
-	std::cout << "time: " << duration << std::endl;
-	//system("pause");
-
-	// =============================== 
-
-	beginTest = clock();
-
-	for (int i = 0; i < MAX; i++) {
-		// if (i % 100 == 0)
-		// std::cout << ((double)i / MAX) << std::endl;
-		//std::cout << test.getText() << std::endl;
-		//std::cout << std::endl;
-
-		/*if (i == 26353) {
-			std::cout << 1;
-		}*/
-
-
-
-		std::apply([&test2, &i](int a, int b, char c) {
-			if (b == 0)
-				test2.localInsert(a, c);
-			else
-				test2.localDelete(a);
-			}, data[i]);
-
-		//std::cout << std::get<0>(p)<< ' ' << std::get<1>(p) << ' ' << (char)std::get<2>(p) << std::endl;
-	}
-	endTest = clock();
-
-	std::cout << test2.getText() << std::endl;
-	duration = double(endTest - beginTest) / CLK_TCK;
-	std::cout << "time: " << duration << std::endl;
-	//system("pause");
 
 
 	// ===================================
@@ -140,55 +88,59 @@ int main()
 
 	*/
 
-	std::cout << "\ntime: " << duration << std::endl;
-	std::cout << "验证:" << (test.getText() == test2.getText()) << std::endl;
-	std::cout << "验证size:" << test.getText().size() << std::endl;
-	std::cout << "验证size:" << test2.getText().size() << std::endl;
-	system("pause");
+	bool _flag = true;
+	if (!(test.getText() == test2.getText()))
+		_flag = false;
 
-	
-	
+	//std::cout << test3.getText() << std::endl;
 
-	/*
-	
-	std::string s = "aaabbbcccddd";
 
-	std::cout << "====start====" << std::endl;
-
-	for (int i = 0; i < s.size(); i++)
-	{
-		test.localInsert(i, s[i]);
-	}
-	std::cout << test.getText() << std::endl;
-
+	if(_flag)
+		std::cout << "数据正确" << std::endl;
+	else
+		std::cout << "数据错误" << std::endl;
 	//system("pause");
-	// test.localInsert(5, 'X');
-
-	// std::cout << test.getText() << std::endl;
-
-	//test.localDelete(5);
-
-	for (int i = 0; i < 5; ++i) {
-		test.localDelete(i);
-	}
-
-	std::cout << test.getText() << std::endl;
-
-	test.localInsert(4, 'X');
-	test.localInsert(4, 'Y');
-	test.localInsert(4, 'Z');
-
-	test.localDelete(2);
-	test.localDelete(3);
-	test.localDelete(4);
-
-
-
-
-	std::cout << test.getText() << std::endl;
-	system("pause");
-	
-	*/
 
 	return 0;
+}
+
+void testF(Doc& test, std::vector<std::tuple<int, int, char>> data) {
+	PROCESS_MEMORY_COUNTERS pmcBegin, pmcEnd;
+	GetProcessMemoryInfo(GetCurrentProcess(), &pmcBegin, sizeof(pmcBegin));
+	clock_t beginTest = clock();
+
+	for (int i = 0; i < MAX; i++) {
+		// std::cout << ((double)i / MAX) << std::endl;
+		std::apply([&test](int a, int b, char c) {
+			if (b == 0)
+				test.localInsert(a, c);
+			else
+				test.localDelete(a);
+			}, data[i]);
+	}
+	string _type;
+	if (typeid(*test.yStruct) == typeid(BPlusTree)) {
+		_type = "B+树";
+		((YJS_NAMESPACE::BPlusTree*)test.yStruct)->checkPool();
+	}
+
+	if (typeid(*test.yStruct) == typeid(YListNew)) {
+		_type = "双链表";
+	}
+
+	if (typeid(*test.yStruct) == typeid(AVLTree)) {
+		_type = "AVL树";
+	}
+
+	clock_t endTest = clock();
+	GetProcessMemoryInfo(GetCurrentProcess(), &pmcEnd, sizeof(pmcEnd));
+
+	//std::cout << test.getText() << std::endl;
+	double duration = double(endTest - beginTest) / CLK_TCK;
+	double memory = double(pmcEnd.WorkingSetSize - pmcBegin.WorkingSetSize) / (1024 * 1024);
+	std::cout << _type << std::endl;
+	std::cout << "时间: " << duration << "秒" << std::endl;
+	std::cout << "内存: " << memory << "MB" << std::endl;
+	std::cout << std::endl;
+	//system("pause");
 }

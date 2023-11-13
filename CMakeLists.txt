@@ -18,6 +18,7 @@ add_library(common1 STATIC
     "src/struct/YList.cpp"
     "src/struct/BPlusTree.cpp"
     "src/struct/YListNew.cpp"
+    "src/struct/AVLTree.cpp"
 )
 
 

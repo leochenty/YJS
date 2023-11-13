@@ -93,7 +93,7 @@ namespace YJS_NAMESPACE {
 			insertNode->left = _insertFirst;
 			_insertSecond->right->left = _insertSecond;
 
-			for (int i = 0; i < 4; ++i) {
+			for (int i = 0; i < cacheSize; ++i) {
 				this->_cachePos[i] = -1;
 			}
 

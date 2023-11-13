@@ -491,7 +491,6 @@ namespace YJS_NAMESPACE {
 
     void BPlusTree::insertItem(Index index, ItemMessage itemMsg)
     {
-        /*加入了缓存*/
         if (PoolSize == 0) {
             PoolId = itemMsg.id;
             insertIndex = index;
@@ -538,7 +537,6 @@ namespace YJS_NAMESPACE {
 
     ItemPtr BPlusTree::getItemByPos(Index index) const
     {
-        /*先看是在缓存中*/
         if (PoolSize != 0 && index >= (insertIndex - PoolSize) && index < insertIndex) {
             LeafNode leaf;
             int offset = index - (insertIndex - PoolSize);
@@ -550,7 +548,7 @@ namespace YJS_NAMESPACE {
             return make_pair(Item, offset);
         }
         else
-        {   // 如果查找的还未插入
+        {   
             if (PoolSize != 0 && index >= (insertIndex - PoolSize))
             {
                 index -= PoolSize;

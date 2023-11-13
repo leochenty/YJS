@@ -3,6 +3,8 @@
 
 #pragma once
 
+#define _HAS_STD_BYTE 0
+
 #include <iostream>
 #include <fstream>
 
@@ -17,5 +19,11 @@
 # include<ctime>
 
 #include <list>
+
+#include <windows.h>
+
+#include <psapi.h>
+
+
 
 // TODO: 在此处引用程序需要的其他标头。
