@@ -1,7 +1,8 @@
 #include "src/struct/BPlusTree.h"
 
 namespace YJS_NAMESPACE {
-
+    int memoryInternal = 0;
+    int memoryLeaf = 0;
     char Pool[STRING_POOL_MAX + 1] = { '\0' };
     Id PoolId = {}; 
     int PoolSize = 0;
@@ -42,6 +43,14 @@ namespace YJS_NAMESPACE {
                 pNode->FreeChildren();
             }
             if (pNode != nullptr) {
+                if (!pNode->isleaf)
+                {
+                    memoryInternal += sizeof(*((InternalNode*)pNode));
+                }
+                else
+                {
+                    memoryLeaf += sizeof(*((LeafNode*)pNode));
+                }
                 delete pNode;
             }
         }
@@ -57,10 +66,15 @@ namespace YJS_NAMESPACE {
         if (nullptr != BT_root) {
             BT_root->FreeChildren();
             if (BT_root != nullptr) {
+                memoryInternal += sizeof(*((InternalNode*)BT_root));
                 delete BT_root;
             }
         }
         BT_root = nullptr;
+        cout << "B+ Tree:" << endl;
+        cout <<"InternalNode size: "<< memoryInternal / 1024<< "KB" << endl;
+        cout <<"LeafNode size: "<< memoryLeaf / 1024<< "KB" << endl;
+        cout <<"Total size: "<< (memoryInternal + memoryLeaf) / 1024<< "KB" << endl;
     }
 
     Id BPlusTree::getId(ItemPtr itemPtr) const
@@ -133,8 +147,17 @@ namespace YJS_NAMESPACE {
 				path.push(i);
 				cursor = cursor->GetChild()[i];
 			}
-
-			return make_tuple(remain, cursor, path);
+            int len = 0;
+            vector<char>isdeleted =  cursor->GetDeleted();
+            while (remain > 0)
+            {
+                if (isdeleted[len] == 0)
+                {
+                    remain--;
+                }
+                len++;
+            }
+			return make_tuple(len, cursor, path);
 		}
     }
 
@@ -172,8 +195,13 @@ namespace YJS_NAMESPACE {
         else {
             TreeNode* parent = originLeaf->parent;
             insertLeaf->parent = parent;
-
-            if (splitIdx == 0) {
+            int len = 0;
+            vector<char> isdeleted = originLeaf->GetDeleted();
+            for (int i = 0; i < splitIdx; i++)
+            {
+                len += (int)isdeleted[i];
+            }
+            if ((splitIdx-len) == 0) {
                 insertLeaf->SetRightOfLeaf(originLeaf);
                 insertLeaf->SetLeftOfLeaf(originLeaf->GetLeftOfLeaf());
                 if (originLeaf->GetLeftOfLeaf() != nullptr)
@@ -241,31 +269,31 @@ namespace YJS_NAMESPACE {
         vector<char> isdeleted = originLeaf->GetDeleted();
         isdeleted[splitIdx] = true;
         originLeaf->SetDeleted(isdeleted);
-        TreeNode* rightLeaf = nullptr;
+        //TreeNode* rightLeaf = nullptr;
 
-        if (splitIdx != (int)(vec.size() - 1)) {
-            rightLeaf = new LeafNode;
-            Id gid(originLeaf->GetGID().client, originLeaf->GetGID().clock + splitIdx + 1);
-            rightLeaf->SetGID(gid);
-            vector<char>originDeleted = originLeaf->GetDeleted();
-            originDeleted.assign(originDeleted.begin() + splitIdx + 1, originDeleted.end());
-            rightLeaf->SetNode(originLeaf->GetNode().substr(splitIdx + 1));
-            rightLeaf->SetDeleted(originDeleted);
+        //if (splitIdx != (int)(vec.size() - 1)) {
+        //    rightLeaf = new LeafNode;
+        //    Id gid(originLeaf->GetGID().client, originLeaf->GetGID().clock + splitIdx + 1);
+        //    rightLeaf->SetGID(gid);
+        //    vector<char>originDeleted = originLeaf->GetDeleted();
+        //    originDeleted.assign(originDeleted.begin() + splitIdx + 1, originDeleted.end());
+        //    rightLeaf->SetNode(originLeaf->GetNode().substr(splitIdx + 1));
+        //    rightLeaf->SetDeleted(originDeleted);
 
-            rightLeaf->parent = parent;
-            rightLeaf->SetLeftOfLeaf(originLeaf);
-            rightLeaf->SetRightOfLeaf(originLeaf->GetRightOfLeaf());
-            if (originLeaf->GetRightOfLeaf()!= nullptr)
-            {
-                originLeaf->GetRightOfLeaf()->SetLeftOfLeaf(rightLeaf);
-            }
-            originDeleted = originLeaf->GetDeleted();
-            originDeleted.assign(originDeleted.begin(), originDeleted.begin() + splitIdx + 1);
-            originLeaf->SetDeleted(originDeleted);
-            originLeaf->SetNode(originLeaf->GetNode().substr(0, splitIdx + 1));
+        //    rightLeaf->parent = parent;
+        //    rightLeaf->SetLeftOfLeaf(originLeaf);
+        //    rightLeaf->SetRightOfLeaf(originLeaf->GetRightOfLeaf());
+        //    if (originLeaf->GetRightOfLeaf()!= nullptr)
+        //    {
+        //        originLeaf->GetRightOfLeaf()->SetLeftOfLeaf(rightLeaf);
+        //    }
+        //    originDeleted = originLeaf->GetDeleted();
+        //    originDeleted.assign(originDeleted.begin(), originDeleted.begin() + splitIdx + 1);
+        //    originLeaf->SetDeleted(originDeleted);
+        //    originLeaf->SetNode(originLeaf->GetNode().substr(0, splitIdx + 1));
 
-            originLeaf->SetRightOfLeaf(rightLeaf);
-        }
+        //    originLeaf->SetRightOfLeaf(rightLeaf);
+        //}
 
         int updateIdx = path.top();
         path.pop();
@@ -277,9 +305,9 @@ namespace YJS_NAMESPACE {
         vector<unsigned int> offset = parent->GetOffset();
         offset[updateIdx] = originLeaf->GetNode().size() - len;
         parent->SetOffset(offset);
-        parent->SetSum(parent->GetSum() -len);
+        parent->SetSum(parent->GetSum() -1);
 
-        if (rightLeaf != nullptr) {
+ /*       if (rightLeaf != nullptr) {
             offset = parent->GetOffset();
             int len = 0;
             for (char det : rightLeaf->GetDeleted())
@@ -291,7 +319,7 @@ namespace YJS_NAMESPACE {
             vector<TreeNode*> child = parent->GetChild();
             child.insert(child.begin() + updateIdx + 1, rightLeaf);
             parent->SetChild(child);
-        }
+        }*/
 
         insertInternal(parent, path, -1); 
     }
