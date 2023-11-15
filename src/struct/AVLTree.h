@@ -11,60 +11,65 @@ using namespace YJS_NAMESPACE;
 
 namespace YJS_NAMESPACE {
 
-class AVLNode; //Ç°ÖÃÉùÃ÷
+class AVLNode; //å‰ç½®å£°æ˜
 
 class CharacterInfo {
 private:
-    //YATAËã·¨ĞèÒªµÄÊı¾İ
-    Id leftOriginId;
-    //YATAËã·¨ĞèÒªµÄÊı¾İ
-    Id rightOriginId;
-    //ÊÇ·ñÉ¾³ıµÄ±ê¼Ç£¬ÎªtrueÔòÎª±»É¾³ı£¨¼ÙÉ¾£©£¬ÎªfalseÔòÎ´±»É¾³ı
+    //YATAç®—æ³•éœ€è¦çš„æ•°æ®
+    // Id leftOriginId;
+    //YATAç®—æ³•éœ€è¦çš„æ•°æ®
+    // Id rightOriginId;
+    //æ˜¯å¦åˆ é™¤çš„æ ‡è®°ï¼Œä¸ºtrueåˆ™ä¸ºè¢«åˆ é™¤ï¼ˆå‡åˆ ï¼‰ï¼Œä¸ºfalseåˆ™æœªè¢«åˆ é™¤
     bool isDeleted;
 
 public:
     CharacterInfo() {
-        isDeleted = false;
+        // isDeleted = false;
+        // TODO: debug _successor()
+        isDeleted = true;
     }
-    CharacterInfo(const ItemMessage &message) {
-        this->leftOriginId = message.origin;
-        this->rightOriginId = message.rightOrigin;
-        this->isDeleted = false;
+    CharacterInfo(const ItemMessage &message):
+        // leftOriginId(message.origin), 
+        // rightOriginId(message.rightOrigin),  
+        isDeleted(false) {
     }
-    Id getLeftOriginId()  const {return leftOriginId;}
-    Id getRightOriginId() const {return rightOriginId;}
+    // Id getLeftOriginId()  const {return leftOriginId;}
+    // Id getRightOriginId() const {return rightOriginId;}
     bool getisDeleted()     const {return isDeleted;}
     void setDeleted(bool isDeleted) {this->isDeleted = isDeleted;}
 };
 
 class AVLNode : public ItemListInterface {
 public:
-    //ÉèÖÃ3Ö»ÊÇÎªÁË·½±ã²âÊÔ£¬¿ÉÒÔÉèÖÃÎª8¡¢10¡¢16»òÕßÆäËû
-    static int SPACE_SIZE; //ÀàÍâ³õÊ¼»¯
-    //¸Ã½Úµã³õÊ¼ÔªËØµÄId£¬ÎŞÂÛÊÇ·ñ±»É¾³ı
+    //è®¾ç½®3åªæ˜¯ä¸ºäº†æ–¹ä¾¿æµ‹è¯•ï¼Œå¯ä»¥è®¾ç½®ä¸º8ã€10ã€16æˆ–è€…å…¶ä»–
+    static int SPACE_SIZE; //ç±»å¤–åˆå§‹åŒ–
+    static double ByteS; //è®°å½•æ•°æ®ç»“æ„å ç”¨å¤šå°‘å­—èŠ‚
+    static int NODE_COUNT; //æ€»ç»“ç‚¹æ•°
+    static int SPLIT_NODE; //åˆ†è£‚äº§ç”Ÿçš„ç»“ç‚¹æ•°
+    //è¯¥èŠ‚ç‚¹åˆå§‹å…ƒç´ çš„Idï¼Œæ— è®ºæ˜¯å¦è¢«åˆ é™¤
     // Id gid;
-    //ÓÃÓÚ´æ´¢Êµ¼ÊµÄ×Ö·ûÊı¾İ£¬´óĞ¡Ôİ¶¨Îª10
+    //ç”¨äºå­˜å‚¨å®é™…çš„å­—ç¬¦æ•°æ®ï¼Œå¤§å°æš‚å®šä¸º10
     // vector<char> text; 
-    //ÓÃÓÚ¼ÇÂ¼Ã¿¸ö×Ö·ûµÄĞÅÏ¢£¬ÊÇ·ñ±»É¾³ı£¬Ô­Ê¼Ç°ÇıºÍÔ­Ê¼ºó¼Ì
+    //ç”¨äºè®°å½•æ¯ä¸ªå­—ç¬¦çš„ä¿¡æ¯ï¼Œæ˜¯å¦è¢«åˆ é™¤ï¼ŒåŸå§‹å‰é©±å’ŒåŸå§‹åç»§
     vector<CharacterInfo> informations;
-    //¸Ã½ÚµãËùÔÚµÄ¸ß¶È£¬ÓÃÓÚAVLÊ÷µÄÆ½ºâ
+    //è¯¥èŠ‚ç‚¹æ‰€åœ¨çš„é«˜åº¦ï¼Œç”¨äºAVLæ ‘çš„å¹³è¡¡
     int height;
-    //Êı×éÖĞºÏ·¨Êı¾İµÄ´óĞ¡
+    //æ•°ç»„ä¸­åˆæ³•æ•°æ®çš„å¤§å°
     int validDataSize;
-    //Êı×éÖĞËùÓĞµÄÊı¾İ´óĞ¡£¬¼´°üÀ¨±»É¾³ıµÄÊı¾İ
+    //æ•°ç»„ä¸­æ‰€æœ‰çš„æ•°æ®å¤§å°ï¼Œå³åŒ…æ‹¬è¢«åˆ é™¤çš„æ•°æ®
     int allDataSize;
 
-    //ÒÔ¸Ã½ÚµãÎª¸ù½ÚµãµÄÊ÷µÄÓĞĞ§ÖµµÄ¸öÊı!!ÓÃÓÚ¸ù¾İpos¶Ô½Úµã½øĞĞËÑË÷
+    //ä»¥è¯¥èŠ‚ç‚¹ä¸ºæ ¹èŠ‚ç‚¹çš„æ ‘çš„æœ‰æ•ˆå€¼çš„ä¸ªæ•°!!ç”¨äºæ ¹æ®poså¯¹èŠ‚ç‚¹è¿›è¡Œæœç´¢
     int treeSize;
-    //×ó½Úµã
+    //å·¦èŠ‚ç‚¹
     AVLNode *left;
-    //ÓÒ½Úµã
+    //å³èŠ‚ç‚¹
     AVLNode *right;
-    //½ÚµãµÄ¸¸Ö¸Õë
+    //èŠ‚ç‚¹çš„çˆ¶æŒ‡é’ˆ
     AVLNode *parent;
-    //¿Í»§¶Ë´«À´µÄÊı¾İ¡£ÓÃÓÚYATAËã·¨£¬µÚÒ»¸ö×Ö·ûµÄÇ°Çı
+    //å®¢æˆ·ç«¯ä¼ æ¥çš„æ•°æ®ã€‚ç”¨äºYATAç®—æ³•ï¼Œç¬¬ä¸€ä¸ªå­—ç¬¦çš„å‰é©±
     // Id headOrigin;
-    //¿Í»§¶Ë´«À´µÄÊı¾İ¡£ÓÃÓÚYATAËã·¨£¬×îºóÒ»¸ö×Ö·û£¨ÎŞÂÛÊÇ·ñ±»±ê¼ÇÉ¾³ı£©µÄºó¼Ì£¬ÎŞÂÛÊÇ·ñ±»É¾³ı
+    //å®¢æˆ·ç«¯ä¼ æ¥çš„æ•°æ®ã€‚ç”¨äºYATAç®—æ³•ï¼Œæœ€åä¸€ä¸ªå­—ç¬¦ï¼ˆæ— è®ºæ˜¯å¦è¢«æ ‡è®°åˆ é™¤ï¼‰çš„åç»§ï¼Œæ— è®ºæ˜¯å¦è¢«åˆ é™¤
     // Id endRightOrigin;
 
 public:
@@ -88,9 +93,9 @@ public:
 
     bool isDeleted(int offset);
     /**
-     * ½Ó¿Ú´ı²âÊÔ
-     * ¿ÉÄÜ»á³öÏÖËÀÑ­»·
-     * @param validIndex ±íÊ¾Î´±»É¾³ıµÄ½Úµã£¬´Ó0¿ªÊ¼¼ÆÊı
+     * æ¥å£å¾…æµ‹è¯•
+     * å¯èƒ½ä¼šå‡ºç°æ­»å¾ªç¯
+     * @param validIndex è¡¨ç¤ºæœªè¢«åˆ é™¤çš„èŠ‚ç‚¹ï¼Œä»0å¼€å§‹è®¡æ•°
      * @return
      */
     ItemPtr getValidByIndex(int validIndex);
@@ -100,28 +105,29 @@ public:
     bool insertCharacter(int offset, const ItemMessage &message);
 
     /**
-     * ÔÚ½Úµã·ÖÁÑÊ±¸üĞÂ×ÔÉí£¬²ÉÓÃ°²È«µÄ·½Ê½,²Á³ı[offset, SPACE_SIZE]ºóµÄÊı¾İ.
-     * @param offset ¼ÙÉèÎª5£¬Ôò±£ÁôÏÂ±êÎª0ÖÁÏÂ±êÎª4µÄ½Úµã
+     * åœ¨èŠ‚ç‚¹åˆ†è£‚æ—¶æ›´æ–°è‡ªèº«ï¼Œé‡‡ç”¨å®‰å…¨çš„æ–¹å¼,æ“¦é™¤[offset, SPACE_SIZE]åçš„æ•°æ®.
+     * @param offset å‡è®¾ä¸º5ï¼Œåˆ™ä¿ç•™ä¸‹æ ‡ä¸º0è‡³ä¸‹æ ‡ä¸º4çš„èŠ‚ç‚¹
      */
     void frontSplit(int offset);
 
     /**
-     * »ñÈ¡Ò»¸ö½ÚµãµÄ×Ó½Úµã£¬²¢²»¼ÓÈëµ½Ê÷½á¹¹£¬¼´²»»á¼Ì³Ğheight£¬sizeµÈÊôĞÔ
-     * ×ó¿ªÓÒ±Õ£¬´Ó0¿ªÊ¼¼ÆÊı
+     * è·å–ä¸€ä¸ªèŠ‚ç‚¹çš„å­èŠ‚ç‚¹ï¼Œå¹¶ä¸åŠ å…¥åˆ°æ ‘ç»“æ„ï¼Œå³ä¸ä¼šç»§æ‰¿heightï¼Œsizeç­‰å±æ€§
+     * å·¦å¼€å³é—­ï¼Œä»0å¼€å§‹è®¡æ•°
      * @param begin
      * @param end
      * @return
      */
     AVLNode* subAVLNode(int begin, int end);
-
+    Id computeLeftOriginId(int offset);
+    Id computeRightOriginId(int offset);
 };
 
 class AVLTree : public YInterface {
 private:
-    //ĞéÄâÊ÷µÄÍ·½Úµã£¬²Î¿¼ºìºÚÊ÷µÄÊµÏÖ
+    //è™šæ‹Ÿæ ‘çš„å¤´èŠ‚ç‚¹ï¼Œå‚è€ƒçº¢é»‘æ ‘çš„å®ç°
     AVLNode* virtualRoot;
     AVLNode* root;
-    //ÔİÎ´Ê¹ÓÃ£¬ºóĞø¿ª·¢
+    //æš‚æœªä½¿ç”¨ï¼Œåç»­å¼€å‘
     // map<Id, ItemPtr> gidToItemPtr;
 public:
     AVLTree();
@@ -133,7 +139,7 @@ public:
     int getValidDataSize(AVLNode* node) const;
     int getBalance(AVLNode* node) const;
 
-    //°Ñ¹¦ÄÜÎ¯ÍĞ¸øÏÖÓĞº¯Êı
+    //æŠŠåŠŸèƒ½å§”æ‰˜ç»™ç°æœ‰å‡½æ•°
     virtual ItemPtr begin() const override;
     virtual ItemPtr end() const override;
     virtual void insertItem(Index index, ItemMessage itemMsg) override;
@@ -166,9 +172,12 @@ public:
     AVLNode* getPreInsertPos(AVLNode* node) const;
     Id      getIdByItemPtr(ItemPtr nodeOffset) const;
 
-    //²âÊÔÊ±²é¿´Ê÷½á¹¹
+    //æµ‹è¯•æ—¶æŸ¥çœ‹æ ‘ç»“æ„
     void draw(AVLNode* root, AVLNode* flag);
     vector<vector<string>> levelOrder(AVLNode* root, AVLNode* flag);
+
+    //æ‰“å°å†…å­˜ä¿¡æ¯
+    void printMemoryInfo();
 
 private:
     void update(AVLNode* node);

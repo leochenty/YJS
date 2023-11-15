@@ -1,11 +1,24 @@
 #include "AVLTree.h"
 
-int AVLNode::SPACE_SIZE = 3;
+int AVLNode::SPACE_SIZE = 20;
+/*
+64位系统：
+    AVLNode中4个static int计数变量:16B
+    AVLTree中，两个指针：16B
+    每创建一个AVLNode会新增： 64+SPACE_SIZE*2 B，在构造函数中累计
+    通过 AVLTree::getMemory()获取
+*/
+double AVLNode::ByteS = 16 + 16; 
+int AVLNode::NODE_COUNT = 0;  //总结点数：构造函数中累加
+int AVLNode::SPLIT_NODE = 0; //分裂产生的结点数，insertByPos中，分裂情况下累加
 
 AVLNode::AVLNode() : 
     height(1), informations(SPACE_SIZE),
     left(nullptr), right(nullptr), parent(nullptr){
         context.resize(SPACE_SIZE);
+
+        AVLNode::ByteS += 64+SPACE_SIZE*2;
+        ++NODE_COUNT;
 }
 
 
@@ -16,6 +29,9 @@ AVLNode::AVLNode(const ItemMessage &message) :
 
     context.resize(SPACE_SIZE);
     this->informations[0] = CharacterInfo(message);
+
+    AVLNode::ByteS += 64+SPACE_SIZE*2;
+    ++NODE_COUNT;
 };
 
 AVLNode::AVLNode(const vector<ItemMessage> &message) : 
@@ -39,6 +55,9 @@ AVLNode::AVLNode(const vector<ItemMessage> &message) :
     this->validDataSize = length;
     this->allDataSize = length;
     this->treeSize = length;
+
+    AVLNode::ByteS += 64+SPACE_SIZE*2;
+    ++NODE_COUNT;
 }
 
 AVLNode::AVLNode(const Id &gid, char character):
@@ -50,6 +69,11 @@ AVLNode::AVLNode(const Id &gid, char character):
     headId = gid; context.resize(SPACE_SIZE);
     this->context[0] = character;
     this->informations[0] = CharacterInfo();
+    //TODO: debug _successor()
+    this->informations[0].setDeleted(false);
+
+    AVLNode::ByteS += 64+SPACE_SIZE*2;
+    ++NODE_COUNT;
 }
 
 bool AVLNode::isDeleted(int offset) {
@@ -126,7 +150,7 @@ void AVLNode::frontSplit(int offset) {
     this->treeSize = this->treeSize - this->allDataSize + offset;
     this->validDataSize = validDataSize;
     this->allDataSize = offset;
-    this->endRightOrigin = informations[offset - 1].getRightOriginId();
+    this->endRightOrigin = computeRightOriginId(offset-1);
 }
 
 AVLNode* AVLNode::subAVLNode(int begin, int end) {
@@ -150,10 +174,33 @@ AVLNode* AVLNode::subAVLNode(int begin, int end) {
     eden->height = 1;
     eden->allDataSize = end - begin;
     eden->treeSize = end - begin;
-    eden->headOrigin = this->informations[begin].getLeftOriginId();
-    eden->endRightOrigin = this->informations[end - 1].getRightOriginId();
+    eden->headOrigin = computeLeftOriginId(begin);
+    eden->endRightOrigin = computeRightOriginId(end-1);
 
     return eden;
+}
+
+Id AVLNode::computeLeftOriginId(int offset) {
+    if(offset == 0) {
+        return this->headOrigin;
+    } else {
+        //获取初始元素的clock
+        int clock = this->headId.clock;
+        int clientId = this->headId.client;
+        clock = clock+offset-1;
+        return Id(clientId, clock);
+    }
+} 
+
+Id AVLNode::computeRightOriginId(int offset) {
+    if (offset == this->allDataSize - 1) {
+        return this->endRightOrigin;
+    } else {
+        int clock = this->headId.clock;
+        int clientId = this->headId.client;
+        clock = clock + offset + 1;
+        return Id(clientId, clock);
+    }
 }
 
 /*--------------AVLTree-----------------*/
@@ -210,11 +257,6 @@ ItemPtr AVLTree::_begin() const {
     }
     ItemPtr response;
 
-    //TODO: fix reverse option
-    // response.first = node;
-    // response.second = 0;
-    // return response;
-
     while (true) {
         //TODO：判空操作
         if(node == nullptr) return {nullptr,-1};
@@ -229,32 +271,28 @@ ItemPtr AVLTree::_begin() const {
 }
 
 ItemPtr AVLTree::_end() const {
-    if (root == nullptr) {
-        return ItemPtr();
-    }
-    AVLNode* node = root;
-    while (node->right != nullptr) {
-        node = node->right;
-    }
-    ItemPtr response;
+    // if (root == nullptr) {
+    //     return ItemPtr();
+    // }
+    // AVLNode* node = root;
+    // while (node->right != nullptr) {
+    //     node = node->right;
+    // }
+    // ItemPtr response;
 
-    // TODO: fix reverse option
-    // response.first = node;
-    // response.second = node->getAllDataSize();
-    // return response;
+    // while (true) {
+    //     //TODO：判空操作
+    //     if(node == nullptr) return {nullptr,-1};
 
-    while (true) {
-        //TODO：判空操作
-        if(node == nullptr) return {nullptr,-1};
-
-        if (node->getValidDataSize() > 0) {
-            response = node->getValidByIndex(node->validDataSize - 1);
-            //TODO: 左闭右开区间
-            return {response.first, response.second+1};
-        } else {
-            node = getPredecessorNode(node);
-        }
-    }
+    //     if (node->getValidDataSize() > 0) {
+    //         response = node->getValidByIndex(node->validDataSize - 1);
+    //         //TODO: 左闭右开区间
+    //         return {response.first, response.second+1};
+    //     } else {
+    //         node = getPredecessorNode(node);
+    //     }
+    // }
+    return {nullptr, 0};
 }
 
 void AVLTree::update(AVLNode* node) {
@@ -532,6 +570,7 @@ void AVLTree::insertByPos(int pos, const ItemMessage &message) {
         //如果要插入的位置处于Node的字符的中间，则Node分裂，更新原Node，并将分裂后的节点插入到原来节点的下一个节点，
         //再将该字符new一个新的节点
         } else {
+            ++AVLNode::SPLIT_NODE;
             //注意此处的 +1
             int begin = preCharacterItemPtr.second + 1;
             int end = preCharacterNode->getAllDataSize();
@@ -657,11 +696,12 @@ ItemPtr AVLTree::_successor(const ItemPtr &itemptr) const {
 
     //如果offset不是最后一个
     //TODO：左闭右开区间
-    if (offset <= allSize - 1) {
+    if (offset < allSize - 1) {
         int index;
         //TODO：左闭右开区间
-        for (index = offset + 1; index <= allSize; ++index) {
+        for (index = offset + 1; index < allSize; ++index) {
             if (!node->isDeleted(index)) {
+                // if(index <= allSize && node->context[index] == '\0') continue;
                 response.second = index;
                 response.first = node;
                 return response;
@@ -670,9 +710,6 @@ ItemPtr AVLTree::_successor(const ItemPtr &itemptr) const {
         node = this->getSuccessorNode(node);
         response = _successor(ItemPtr(node, -1));
 
-    // // TODO: fix reverse option
-    // if(offset < allSize) {
-    //     return {node, offset+1};
     } else {
         node = this->getSuccessorNode(node);
         response = _successor(ItemPtr(node, -1));
@@ -876,4 +913,12 @@ ItemPtr AVLTree::predecessor(ItemPtr itemPtr) const {
 Id AVLTree::getId(ItemPtr itemPtr) const {
     Id gid = getIdByItemPtr(itemPtr);
     return Id(gid.client, 0);
+}
+
+void AVLTree::printMemoryInfo() {
+    cout<<"-------------AVLTree Memory Info----------------"<<endl;
+    cout<<"每个结点存储的字符数: "<<AVLNode::SPACE_SIZE<<endl;
+    cout<<"总内存: "<<AVLNode::ByteS/1024/1024<<"MB"<<endl;
+    cout<<"总结点数: "<<AVLNode::NODE_COUNT<<endl;
+    cout<<"分裂产生的结点数: "<<AVLNode::SPLIT_NODE<<endl;
 }
