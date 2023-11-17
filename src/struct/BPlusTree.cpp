@@ -1,8 +1,10 @@
 #include "src/struct/BPlusTree.h"
 
 namespace YJS_NAMESPACE {
-    int memoryInternal = 0;
+    int memoryInternal = 8;// BPlusTree 's pointer
     int memoryLeaf = 0;
+    int leafnum = 0;
+    int internalnum = 0;
     char Pool[STRING_POOL_MAX + 1] = { '\0' };
     Id PoolId = {}; 
     int PoolSize = 0;
@@ -43,13 +45,17 @@ namespace YJS_NAMESPACE {
                 pNode->FreeChildren();
             }
             if (pNode != nullptr) {
-                if (!pNode->isleaf)
+                if (!(pNode->isleaf))
                 {
-                    memoryInternal += sizeof(*((InternalNode*)pNode));
+                    int intersize = 9 + pNode->GetChild().size() * 8 + 4 + pNode->GetOffset().size() * 4;
+                    memoryInternal += intersize;
+                    internalnum++;
                 }
                 else
                 {
-                    memoryLeaf += sizeof(*((LeafNode*)pNode));
+                    int leaf = 9 + pNode->GetDeleted().size() * 2 + 40;
+                    memoryLeaf += leaf;
+                    leafnum++;
                 }
                 delete pNode;
             }
@@ -66,13 +72,16 @@ namespace YJS_NAMESPACE {
         if (nullptr != BT_root) {
             BT_root->FreeChildren();
             if (BT_root != nullptr) {
-                memoryInternal += sizeof(*((InternalNode*)BT_root));
+                memoryInternal += 9 + BT_root->GetChild().size() * 8 + 4 + BT_root->GetOffset().size() * 4;
                 delete BT_root;
             }
         }
         BT_root = nullptr;
-        cout << "B+ Tree:" << endl;
+        std::cout << std::endl;
+        cout << "-------------B+ Tree:----------------" << endl;
+        cout << "InternalNodeNum: " << internalnum << endl;
         cout <<"InternalNode size: "<< memoryInternal / 1024<< "KB" << endl;
+        cout << "LeafNum: " << leafnum << endl;
         cout <<"LeafNode size: "<< memoryLeaf / 1024<< "KB" << endl;
         cout <<"Total size: "<< (memoryInternal + memoryLeaf) / 1024<< "KB" << endl;
     }

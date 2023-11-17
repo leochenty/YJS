@@ -11,12 +11,6 @@ namespace YJS_NAMESPACE {
 
     using namespace std;
 
-    struct Node
-    {
-        char content;
-        bool deleted;
-    };
-
     class InternalNode;
     class LeafNode;
 
